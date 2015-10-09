@@ -134,17 +134,20 @@ class NginxConfigurator(common.Plugin):
         """
         vhost = self.choose_vhost(domain)
         directives = [['ssl_certificate', cert_path],
-                      ['ssl_certificate_key', key_path],
-                      ['ssl_trusted_certificate', chain_path],
+                      ['ssl_certificate_key', key_path]]
+        stapling_directives = [['ssl_trusted_certificate', chain_path],
                       ['ssl_stapling', 'on'],
                       ['ssl_stapling_verify', 'on']]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,
                                               directives, True)
+            self.parser.add_server_directives(vhost.filep, vhost.names,
+                                              stapling_directives, False)
             logger.info("Deployed Certificate to VirtualHost %s for %s",
                         vhost.filep, vhost.names)
-        except errors.MisconfigurationError:
+        except errors.MisconfigurationError, e:
+            logger.debug(e)
             logger.warn(
                 "Cannot find a cert or key directive in %s for %s. "
                 "VirtualHost was not modified.", vhost.filep, vhost.names)
