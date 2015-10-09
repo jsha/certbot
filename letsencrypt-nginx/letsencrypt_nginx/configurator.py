@@ -117,23 +117,27 @@ class NginxConfigurator(common.Plugin):
         temp_install(self.mod_ssl_conf)
 
     # Entry point in main.py for installing cert
-    def deploy_cert(self, domain, cert_path, key_path, chain_path=None):
+    def deploy_cert(self, domain, cert_path, key_path, chain_path):
         # pylint: disable=unused-argument
         """Deploys certificate to specified virtual host.
 
         .. note:: Aborts if the vhost is missing ssl_certificate or
             ssl_certificate_key.
 
-        .. note:: Nginx doesn't have a cert chain directive, so the last
-            parameter is always ignored. It expects the cert file to have
-            the concatenated chain.
+        .. note:: Nginx doesn't have a cert chain directive.
+            It expects the cert file to have the concatenated chain.
+            However, we use the chain file as input to the
+            ssl_trusted_certificate directive, used for verify OCSP responses.
 
         .. note:: This doesn't save the config files!
 
         """
         vhost = self.choose_vhost(domain)
         directives = [['ssl_certificate', cert_path],
-                      ['ssl_certificate_key', key_path]]
+                      ['ssl_certificate_key', key_path],
+                      ['ssl_trusted_certificate', chain_path],
+                      ['ssl_stapling', 'on'],
+                      ['ssl_stapling_verify', 'on']]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,
