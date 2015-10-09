@@ -241,7 +241,7 @@ class IInstaller(IPlugin):
 
         """
 
-    def deploy_cert(domain, cert_path, key_path, chain_path=None):
+    def deploy_cert(domain, cert_path, key_path, chain_path):
         """Deploy certificate.
 
         :param str domain: domain to deploy certificate file
