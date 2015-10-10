@@ -134,16 +134,12 @@ class NginxConfigurator(common.Plugin):
         """
         vhost = self.choose_vhost(domain)
         directives = [['ssl_certificate', chain_path],
-                      ['ssl_certificate_key', key_path]]
-        stapling_directives = [['ssl_trusted_certificate', chain_path],
-                      ['ssl_stapling', 'on'],
-                      ['ssl_stapling_verify', 'on']]
+                      ['ssl_certificate_key', key_path],
+                      ['ssl_trusted_certificate', chain_path]]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,
                                               directives, True)
-            self.parser.add_server_directives(vhost.filep, vhost.names,
-                                              stapling_directives, False)
             logger.info("Deployed Certificate to VirtualHost %s for %s",
                         vhost.filep, vhost.names)
         except errors.MisconfigurationError, e:
@@ -308,6 +304,8 @@ class NginxConfigurator(common.Plugin):
                          self.config.work_dir, 'error.log')],
                      ['ssl_certificate', snakeoil_cert],
                      ['ssl_certificate_key', snakeoil_key],
+                     # Fill this in here to be replaced in deploy_cert.
+                     ['ssl_trusted_certificate', snakeoil_cert],
                      ['include', self.parser.loc["ssl_options"]]]
         self.parser.add_server_directives(
             vhost.filep, vhost.names, ssl_block)
