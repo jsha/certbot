@@ -307,7 +307,7 @@ class NginxConfigurator(common.Plugin):
                      ['ssl_certificate_key', snakeoil_key]]
         # OCSP stapling was introduced in Nginx 1.3.7. If we have that version
         # or greater, add config settings for it.
-        if self.version >= (1,3,7):
+        if self.version >= (1, 3, 7):
             ssl_block.extend([
                 # Dummy ssl_trusted_certificate to be replaced in deploy_cert.
                 ['ssl_trusted_certificate', snakeoil_cert],
