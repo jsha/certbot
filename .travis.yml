@@ -40,13 +40,10 @@ addons:
     - libffi-dev
     - ca-certificates
     # For letsencrypt-nginx integration testing
-    - nginx
+    - nginx-light
     - openssl
     # For Boulder integration testing
     - rsyslog
-
-before_install:
-  - nginx -V
 
 install: "travis_retry pip install tox coveralls"
 before_script: '[ "xxx$BOULDER_INTEGRATION" = "xxx" ] || ./tests/boulder-start.sh'
