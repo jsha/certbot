@@ -26,7 +26,7 @@ http {
   fastcgi_temp_path $root/fastcgi_temp;
   proxy_temp_path $root/proxy_temp;
   #scgi_temp_path $root/scgi_temp;
-  #uwsgi_temp_path $root/uwsgi_temp;
+  uwsgi_temp_path $root/uwsgi_temp;
 
   # This should be turned off in a Virtualbox VM, as it can cause some
   # interesting issues with data corruption in delivered files.
