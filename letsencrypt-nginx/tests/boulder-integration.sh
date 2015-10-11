@@ -1,5 +1,5 @@
 #!/bin/sh -xe
-# prerequisite: apt-get install --no-install-recommends nginx-light openssl
+# prerequisite: apt-get install --no-install-recommends nginx openssl
 
 . ./tests/integration/_common.sh
 

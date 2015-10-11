@@ -40,7 +40,7 @@ addons:
     - libffi-dev
     - ca-certificates
     # For letsencrypt-nginx integration testing
-    - nginx-light
+    - nginx
     - openssl
     # For Boulder integration testing
     - rsyslog
