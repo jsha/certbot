@@ -134,9 +134,9 @@ class NginxConfigurator(common.Plugin):
 
         """
         vhost = self.choose_vhost(domain)
-        directives = [['ssl_certificate', cert_path],
+        directives = [['ssl_certificate', fullchain_path],
                       ['ssl_certificate_key', key_path],
-                      ['ssl_trusted_certificate', fullchain_path]]
+                      ['ssl_trusted_certificate', chain_path]]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,
