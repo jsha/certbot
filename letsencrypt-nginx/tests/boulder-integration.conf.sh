@@ -25,8 +25,8 @@ http {
   client_body_temp_path $root/client_body;
   fastcgi_temp_path $root/fastcgi_temp;
   proxy_temp_path $root/proxy_temp;
-  scgi_temp_path $root/scgi_temp;
-  uwsgi_temp_path $root/uwsgi_temp;
+  #scgi_temp_path $root/scgi_temp;
+  #uwsgi_temp_path $root/uwsgi_temp;
 
   # This should be turned off in a Virtualbox VM, as it can cause some
   # interesting issues with data corruption in delivered files.
@@ -45,7 +45,6 @@ http {
     '"\$http_user_agent" "\$http_x_forwarded_for"';
 
   default_type application/octet-stream;
-  $directives
 
   server {
     # IPv4.
