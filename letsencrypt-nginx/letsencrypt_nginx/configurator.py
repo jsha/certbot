@@ -134,13 +134,23 @@ class NginxConfigurator(common.Plugin):
 
         """
         vhost = self.choose_vhost(domain)
-        directives = [['ssl_certificate', fullchain_path],
-                      ['ssl_certificate_key', key_path],
-                      ['ssl_trusted_certificate', chain_path]]
+        cert_directives = [['ssl_certificate', fullchain_path],
+                           ['ssl_certificate_key', key_path]]
+
+        # OCSP stapling was introduced in Nginx 1.3.7. If we have that version
+        # or greater, add config settings for it.
+        stapling_directives = []
+        if self.version >= (1, 3, 7):
+            stapling_directives = [
+                ['ssl_trusted_certificate', chain_path],
+                ['ssl_stapling', 'on'],
+                ['ssl_stapling_verify', 'on']]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,
-                                              directives, True)
+                                              cert_directives, True)
+            self.parser.add_server_directives(vhost.filep, vhost.names,
+                                              stapling_directives, False)
             logger.info("Deployed Certificate to VirtualHost %s for %s",
                         vhost.filep, vhost.names)
         except errors.MisconfigurationError, e:
@@ -304,14 +314,8 @@ class NginxConfigurator(common.Plugin):
                      ['error_log', os.path.join(
                          self.config.work_dir, 'error.log')],
                      ['ssl_certificate', snakeoil_cert],
-                     ['ssl_certificate_key', snakeoil_key]]
-        # OCSP stapling was introduced in Nginx 1.3.7. If we have that version
-        # or greater, add config settings for it.
-        if self.version >= (1, 3, 7):
-            ssl_block.extend([
-                # Dummy ssl_trusted_certificate to be replaced in deploy_cert.
-                ['ssl_trusted_certificate', snakeoil_cert],
-                ['include', self.parser.loc["ssl_options"]]])
+                     ['ssl_certificate_key', snakeoil_key],
+                     ['include', self.parser.loc["ssl_options"]]]
         self.parser.add_server_directives(
             vhost.filep, vhost.names, ssl_block)
         vhost.ssl = True

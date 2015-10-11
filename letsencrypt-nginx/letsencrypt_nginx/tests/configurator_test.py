@@ -96,10 +96,35 @@ class NginxConfiguratorTest(util.NginxTest):
     def test_more_info(self):
         self.assertTrue('nginx.conf' in self.config.more_info())
 
+    def test_deploy_cert_stapling(self):
+        # Choose a version of Nginx greater than 1.3.7 so stapling code gets
+        # invoked.
+        self.config.version = (1, 9, 6)
+        example_conf = self.config.parser.abs_path('sites-enabled/example.com')
+        self.config.deploy_cert(
+            "www.example.com",
+            "example/cert.pem",
+            "example/key.pem",
+            "example/chain.pem",
+            "example/fullchain.pem")
+        self.config.save()
+        self.config.parser.load()
+        generated_conf = self.config.parser.parsed[example_conf]
+
+        self.assertTrue(util.contains_at_depth(generated_conf,
+            ['ssl_stapling', 'on'], 2))
+        self.assertTrue(util.contains_at_depth(generated_conf,
+            ['ssl_stapling_verify', 'on'], 2))
+        self.assertTrue(util.contains_at_depth(generated_conf,
+            ['ssl_trusted_certificate', 'example/chain.pem'], 2))
+
     def test_deploy_cert(self):
         server_conf = self.config.parser.abs_path('server.conf')
         nginx_conf = self.config.parser.abs_path('nginx.conf')
         example_conf = self.config.parser.abs_path('sites-enabled/example.com')
+        # Choose a version of Nginx less than 1.3.7 so stapling code doesn't get
+        # invoked.
+        self.config.version = (1, 3, 1)
 
         # Get the default SSL vhost
         self.config.deploy_cert(
@@ -126,7 +151,6 @@ class NginxConfiguratorTest(util.NginxTest):
         error_log = os.path.join(self.work_dir, "error.log")
         self.assertEqual([[['server'],
                            [['include', self.config.parser.loc["ssl_options"]],
-                            ['ssl_trusted_certificate', 'example/chain.pem'],
                             ['ssl_certificate_key', 'example/key.pem'],
                             ['ssl_certificate', 'example/fullchain.pem'],
                             ['error_log', error_log],
@@ -143,7 +167,6 @@ class NginxConfiguratorTest(util.NginxTest):
         self.assertTrue(util.contains_at_depth(parsed_nginx_conf,
                        [['server'],
                         [['include', self.config.parser.loc["ssl_options"]],
-                         ['ssl_trusted_certificate', '/etc/nginx/chain.pem'],
                          ['ssl_certificate_key', '/etc/nginx/key.pem'],
                          ['ssl_certificate', '/etc/nginx/fullchain.pem'],
                          ['error_log', error_log],
