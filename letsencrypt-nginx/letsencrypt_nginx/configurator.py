@@ -117,7 +117,8 @@ class NginxConfigurator(common.Plugin):
         temp_install(self.mod_ssl_conf)
 
     # Entry point in main.py for installing cert
-    def deploy_cert(self, domain, cert_path, key_path, chain_path):
+    def deploy_cert(self, domain, cert_path, key_path,
+        chain_path, fullchain_path):
         # pylint: disable=unused-argument
         """Deploys certificate to specified virtual host.
 
@@ -133,9 +134,9 @@ class NginxConfigurator(common.Plugin):
 
         """
         vhost = self.choose_vhost(domain)
-        directives = [['ssl_certificate', chain_path],
+        directives = [['ssl_certificate', cert_path],
                       ['ssl_certificate_key', key_path],
-                      ['ssl_trusted_certificate', chain_path]]
+                      ['ssl_trusted_certificate', fullchain_path]]
 
         try:
             self.parser.add_server_directives(vhost.filep, vhost.names,

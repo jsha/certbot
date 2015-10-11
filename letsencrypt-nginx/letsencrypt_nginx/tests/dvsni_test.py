@@ -108,7 +108,7 @@ class DvsniPerformTest(util.NginxTest):
         http = self.sni.configurator.parser.parsed[
             self.sni.configurator.parser.loc["root"]][-1]
         self.assertTrue(['include', self.sni.challenge_conf] in http[1])
-        self.assertTrue(['server_name', 'blah'] in http[1][-2][1])
+        self.assertTrue(['server_name', 'blah'] in http[1][-1][1])
 
         self.assertEqual(len(sni_responses), 3)
         for i in xrange(3):

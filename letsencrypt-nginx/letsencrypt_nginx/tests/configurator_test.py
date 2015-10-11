@@ -104,10 +104,16 @@ class NginxConfiguratorTest(util.NginxTest):
         # Get the default SSL vhost
         self.config.deploy_cert(
             "www.example.com",
-            "example/cert.pem", "example/key.pem")
+            "example/cert.pem",
+            "example/key.pem",
+            "example/chain.pem",
+            "example/fullchain.pem")
         self.config.deploy_cert(
             "another.alias",
-            "/etc/nginx/cert.pem", "/etc/nginx/key.pem")
+            "/etc/nginx/cert.pem",
+            "/etc/nginx/key.pem",
+            "/etc/nginx/chain.pem",
+            "/etc/nginx/fullchain.pem")
         self.config.save()
 
         self.config.parser.load()
@@ -128,6 +134,7 @@ class NginxConfiguratorTest(util.NginxTest):
                             ['error_log', error_log],
                             ['ssl_certificate', 'example/cert.pem'],
                             ['ssl_certificate_key', 'example/key.pem'],
+                            ['ssl_trusted_certificate', 'example/fullchain.pem'],
                             ['include',
                              self.config.parser.loc["ssl_options"]]]]],
                          parsed_example_conf)
@@ -145,6 +152,7 @@ class NginxConfiguratorTest(util.NginxTest):
                            ['error_log', error_log],
                            ['ssl_certificate', '/etc/nginx/cert.pem'],
                            ['ssl_certificate_key', '/etc/nginx/key.pem'],
+                           ['ssl_trusted_certificate', '/etc/nginx/fullchain.pem'],
                            ['include',
                             self.config.parser.loc["ssl_options"]]]],
                          parsed_nginx_conf[-1][-1][-1])
@@ -156,10 +164,16 @@ class NginxConfiguratorTest(util.NginxTest):
         # Get the default SSL vhost
         self.config.deploy_cert(
             "www.example.com",
-            "example/cert.pem", "example/key.pem")
+            "example/cert.pem",
+            "example/key.pem",
+            "example/chain.pem",
+            "example/fullchain.pem")
         self.config.deploy_cert(
             "another.alias",
-            "/etc/nginx/cert.pem", "/etc/nginx/key.pem")
+            "/etc/nginx/cert.pem",
+            "/etc/nginx/key.pem",
+            "/etc/nginx/chain.pem",
+            "/etc/nginx/fullchain.pem")
         self.config.save()
 
         self.config.parser.load()
