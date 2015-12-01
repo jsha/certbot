@@ -28,7 +28,8 @@ set -xe
 go get -d github.com/letsencrypt/boulder/...
 cd $GOPATH/src/github.com/letsencrypt/boulder
 # Install Boulder's testing dependencies.
-./test/travis-before-install.sh
+alias travis_retry=""
+source ./test/travis-before-install.sh
 ./test/create_db.sh
 cd -
 
