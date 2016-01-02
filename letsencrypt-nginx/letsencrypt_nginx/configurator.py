@@ -393,11 +393,10 @@ class NginxConfigurator(common.Plugin):
     def restart(self):
         """Restarts nginx server.
 
-        :returns: Success
-        :rtype: bool
+        :raises .errors.MisconfigurationError: If either the reload fails.
 
         """
-        return nginx_restart(self.conf('ctl'), self.nginx_conf)
+        nginx_restart(self.conf('ctl'), self.nginx_conf)
 
     def config_test(self):  # pylint: disable=no-self-use
         """Check the configuration of Nginx for errors.
@@ -631,18 +630,15 @@ def nginx_restart(nginx_ctl, nginx_conf="/etc/nginx.conf"):
 
             if nginx_proc.returncode != 0:
                 # Enter recovery routine...
-                logger.error("Nginx Restart Failed!\n%s\n%s", stdout, stderr)
-                return False
+                raise errors.MisconfigurationError(
+                    "nginx restart failed:\n%s\n%s" % (stdout, stderr))
 
     except (OSError, ValueError):
-        logger.fatal("Nginx Restart Failed - Please Check the Configuration")
-        sys.exit(1)
+        raise errors.MisconfigurationError("nginx restart failed")
     # Nginx can take a moment to recognize a newly added TLS SNI servername, so sleep
     # for a second. TODO: Check for expected servername and loop until it
     # appears or return an error if looping too long.
     time.sleep(1)
-
-    return True
 
 
 def temp_install(options_ssl):

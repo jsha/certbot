@@ -213,6 +213,7 @@ class NginxParser(object):
             if ext:
                 filename = filename + os.path.extsep + ext
             try:
+                logger.debug('Dumping to %s:\n%s' % (filename, nginxparser.dumps(tree)))
                 with open(filename, 'w') as _file:
                     nginxparser.dump(tree, _file)
             except IOError:
@@ -269,9 +270,12 @@ class NginxParser(object):
         :param bool replace: Whether to only replace existing directives
 
         """
-        _do_for_subarray(self.parsed[filename],
-                         lambda x: self._has_server_names(x, names),
-                         lambda x: _add_directives(x, directives, replace))
+        try:
+            _do_for_subarray(self.parsed[filename],
+                             lambda x: self._has_server_names(x, names),
+                             lambda x: _add_directives(x, directives, replace))
+        except errors.MisconfigurationError as err:
+            raise errors.MisconfigurationError("Problem in %s: %s" % (filename, err.message))
 
     def add_http_directives(self, filename, directives):
         """Adds directives to the first encountered HTTP block in filename.
@@ -467,7 +471,7 @@ def _parse_server(server):
     return parsed_server
 
 
-def _add_directives(block, directives, replace=False):
+def _add_directives(block, directives, replace):
     """Adds or replaces directives in a block. If the directive doesn't exist in
     the entry already, raises a misconfiguration error.
 
@@ -478,21 +482,30 @@ def _add_directives(block, directives, replace=False):
 
     """
     for directive in directives:
-        if not replace:
+        _add_directive(block, directive, replace)
+
+def _add_directive(block, directive, replace):
+    location = -1
+    # Find the index of a config line where the name of the directive matches
+    # the name of the directive we want to add.
+    for index, line in enumerate(block):
+        if len(line) > 0 and line[0] == directive[0]:
+            location = index
+            break
+    if replace:
+        if location == -1:
+            raise errors.MisconfigurationError(
+                'expected directive for %s in the Nginx '
+                'config but did not find it.' % directive[0])
+        block[location] = directive
+    else:
+        # Insert directive. If there's one with a matching name already, fail.
+        if location != -1:
+            raise errors.MisconfigurationError(
+                'tried to insert directive "%s" but found conflicting "%s".' % (
+                " ".join(directive), " ".join(block[location])))
+        else:
             # We insert new directives at the top of the block, mostly
             # to work around https://trac.nginx.org/nginx/ticket/810
             # Only add directive if its not already in the block
-            if directive not in block:
-                block.insert(0, directive)
-        else:
-            changed = False
-            if len(directive) == 0:
-                continue
-            for index, line in enumerate(block):
-                if len(line) > 0 and line[0] == directive[0]:
-                    block[index] = directive
-                    changed = True
-            if not changed:
-                raise errors.MisconfigurationError(
-                    'Let\'s Encrypt expected directive for %s in the Nginx '
-                    'config but did not find it.' % directive[0])
+            block.insert(0, directive)
