@@ -253,7 +253,7 @@ class NginxParser(object):
         return server_names == names
 
     def add_server_directives(self, filename, names, directives,
-                              replace=False):
+                              replace):
         """Add or replace directives in the first server block with names.
 
         ..note :: If replace is True, this raises a misconfiguration error
@@ -280,13 +280,17 @@ class NginxParser(object):
     def add_http_directives(self, filename, directives):
         """Adds directives to the first encountered HTTP block in filename.
 
+        We insert new directives at the top of the block to work around
+        https://trac.nginx.org/nginx/ticket/810: If the first server block
+        doesn't enable OCSP stapling, stapling is broken for all blocks.
+
         :param str filename: The absolute filename of the config file
         :param list directives: The directives to add
 
         """
         _do_for_subarray(self.parsed[filename],
                          lambda x: x[0] == ['http'],
-                         lambda x: _add_directives(x[1], [directives], False))
+                         lambda x: x[1].insert(0, directives))
 
     def get_all_certs_keys(self):
         """Gets all certs and keys in the nginx config.
@@ -472,8 +476,13 @@ def _parse_server(server):
 
 
 def _add_directives(block, directives, replace):
-    """Adds or replaces directives in a block. If the directive doesn't exist in
-    the entry already, raises a misconfiguration error.
+    """Adds or replaces directives in a config block.
+
+    When replace=False, it's an error to try and add a directive that already
+    exists in the config block with a conflicting value.
+
+    When replace=True, a directive with the same name MUST already exist in the
+    config block, and the first instance will be replaced.
 
     ..todo :: Find directives that are in included files.
 
@@ -484,7 +493,14 @@ def _add_directives(block, directives, replace):
     for directive in directives:
         _add_directive(block, directive, replace)
 
+repeatable_directives = set(['server_name', 'listen'])
+
 def _add_directive(block, directive, replace):
+    """Adds or replaces a single directive in a config block.
+
+    See _add_directives for more documentation.
+
+    """
     location = -1
     # Find the index of a config line where the name of the directive matches
     # the name of the directive we want to add.
@@ -499,13 +515,15 @@ def _add_directive(block, directive, replace):
                 'config but did not find it.' % directive[0])
         block[location] = directive
     else:
-        # Insert directive. If there's one with a matching name already, fail.
-        if location != -1:
-            raise errors.MisconfigurationError(
-                'tried to insert directive "%s" but found conflicting "%s".' % (
-                " ".join(directive), " ".join(block[location])))
+        # Append directive. Fail if the name is not a repeatable directive name,
+        # and there is already a copy of that directive with a different value
+        # in the config file.
+        if location != -1 and directive[0].__str__() not in repeatable_directives:
+            if block[location][1] == directive[1]:
+                pass
+            else:
+                raise errors.MisconfigurationError(
+                    'tried to insert directive "%s" but found conflicting "%s".' % (
+                    directive, block[location]))
         else:
-            # We insert new directives at the top of the block, mostly
-            # to work around https://trac.nginx.org/nginx/ticket/810
-            # Only add directive if its not already in the block
-            block.insert(0, directive)
+            block.append(directive)

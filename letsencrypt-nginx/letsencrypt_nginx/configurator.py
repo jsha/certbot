@@ -321,7 +321,7 @@ class NginxConfigurator(common.Plugin):
                      ['ssl_certificate_key', snakeoil_key],
                      ['include', self.parser.loc["ssl_options"]]]
         self.parser.add_server_directives(
-            vhost.filep, vhost.names, ssl_block)
+            vhost.filep, vhost.names, ssl_block, replace=False)
         vhost.ssl = True
         vhost.raw.extend(ssl_block)
         vhost.addrs.add(obj.Addr(
@@ -384,7 +384,7 @@ class NginxConfigurator(common.Plugin):
             [['return', '301 https://$host$request_uri']]
         ]]
         self.parser.add_server_directives(
-            vhost.filep, vhost.names, redirect_block)
+            vhost.filep, vhost.names, redirect_block, replace=False)
         logger.info("Redirecting all traffic to ssl in %s", vhost.filep)
 
     ######################################
