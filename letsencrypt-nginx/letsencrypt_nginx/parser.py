@@ -493,7 +493,7 @@ def _add_directives(block, directives, replace):
     for directive in directives:
         _add_directive(block, directive, replace)
 
-repeatable_directives = set(['server_name', 'listen'])
+repeatable_directives = set(['server_name', 'listen', 'include'])
 
 def _add_directive(block, directive, replace):
     """Adds or replaces a single directive in a config block.

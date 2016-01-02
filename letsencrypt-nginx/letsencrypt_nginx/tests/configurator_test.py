@@ -65,7 +65,8 @@ class NginxConfiguratorTest(util.NginxTest):
         filep = self.config.parser.abs_path('sites-enabled/example.com')
         self.config.parser.add_server_directives(
             filep, set(['.example.com', 'example.*']),
-            [['listen', '5001 ssl']])
+            [['listen', '5001 ssl']],
+            replace=False)
         self.config.save()
 
         # pylint: disable=protected-access
@@ -297,7 +298,7 @@ class NginxConfiguratorTest(util.NginxTest):
         mocked = mock_popen()
         mocked.communicate.return_value = ('', '')
         mocked.returncode = 0
-        self.assertTrue(self.config.restart())
+        self.config.restart()
 
     @mock.patch("letsencrypt_nginx.configurator.subprocess.Popen")
     def test_nginx_restart_fail(self, mock_popen):
