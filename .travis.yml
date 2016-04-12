@@ -129,3 +129,7 @@ notifications:
     on_failure: always
     use_notice: true
     skip_join: true
+
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/venv
