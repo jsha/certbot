@@ -132,8 +132,5 @@ notifications:
 
 cache:
   directories:
-    - $TRAVIS_BUILD_DIR/venv
-    - $HOME/.tox
-before_cache:
-  - ls -l $TRAVIS_BUILD_DIR/venv $HOME/.tox
-
+    - .tox
+    - $HOME/.pip-cache/
