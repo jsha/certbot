@@ -25,6 +25,15 @@ env:
     - PATH=$GOPATH/bin:$PATH
     - GO15VENDOREXPERIMENT=1  # Fixes problems with vendor directories
 
+matrix:
+  include:
+    - python: "2.7"
+      env: TOXENV=py27 BOULDER_INTEGRATION=1
+      sudo: true
+      after_failure:
+        - sudo cat /var/log/mysql/error.log
+        - ps aux | grep mysql
+
 # Only build pushes to the master branch, PRs, and branches beginning with
 # `test-`. This reduces the number of simultaneous Travis runs, which speeds
 # turnaround time on review since there is a cap of 5 simultaneous runs.
@@ -73,7 +82,7 @@ addons:
     #- sudo
 
 install: "travis_retry pip install tox coveralls"
-script: './tests/travis-integration.sh'
+script: 'travis_retry tox && ([ "xxx$BOULDER_INTEGRATION" = "xxx" ] || ./tests/travis-integration.sh)'
 
 after_success: '[ "$TOXENV" == "cover" ] && coveralls'
 
