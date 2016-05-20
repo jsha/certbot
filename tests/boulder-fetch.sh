@@ -28,6 +28,7 @@ set -xe
 mkdir -p $GOPATH/src/github.com/letsencrypt/boulder
 git clone -b test-createdb https://github.com/jsha/boulder/ $GOPATH/src/github.com/letsencrypt/boulder
 cd $GOPATH/src/github.com/letsencrypt/boulder
+git show -v
 # goose is needed for ./test/create_db.sh
 wget https://github.com/jsha/boulder-tools/raw/master/goose.gz && \
   mkdir $GOPATH/bin && \
