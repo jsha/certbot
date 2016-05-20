@@ -25,8 +25,9 @@ set -xe
 
 # `/...` avoids `no buildable Go source files` errors, for more info
 # see `go help packages`
-go get -d github.com/letsencrypt/boulder/...
+go get -d github.com/jsha/boulder/...
 cd $GOPATH/src/github.com/letsencrypt/boulder
+git checkout test-createdb
 # goose is needed for ./test/create_db.sh
 wget https://github.com/jsha/boulder-tools/raw/master/goose.gz && \
   mkdir $GOPATH/bin && \
