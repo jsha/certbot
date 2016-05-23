@@ -605,7 +605,7 @@ class ClientNetwork(object):  # pylint: disable=too-many-instance-attributes
 
 
         """
-        logging.debug('Sending %s request to %s. args: %r, kwargs: %r',
+        logging.log(5, 'Sending %s request to %s. args: %r, kwargs: %r',
                       method, url, args, kwargs)
         kwargs['verify'] = self.verify_ssl
         kwargs.setdefault('headers', {})

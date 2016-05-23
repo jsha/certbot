@@ -25,6 +25,7 @@ set -xe
 
 # `/...` avoids `no buildable Go source files` errors, for more info
 # see `go help packages`
-git clone -b rev-rev https://github.com/letsencrypt/boulder
+git clone -b rev-rev https://github.com/letsencrypt/boulder \
+  $GOPATH/src/github.com/letsencrypt/boulder/
 cd boulder
 docker-compose up -d
