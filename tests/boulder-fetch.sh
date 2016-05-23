@@ -27,15 +27,4 @@ set -xe
 # see `go help packages`
 go get -d github.com/letsencrypt/boulder/...
 cd $GOPATH/src/github.com/letsencrypt/boulder
-docker-compose up -d brabbitmq bmysql
-# goose is needed for ./test/create_db.sh
-wget https://github.com/jsha/boulder-tools/raw/master/goose.gz && \
-  mkdir $GOPATH/bin && \
-  zcat goose.gz > $GOPATH/bin/goose && \
-  chmod +x $GOPATH/bin/goose
-MYSQL_CONTAINER=1 ./test/create_db.sh
-go run cmd/rabbitmq-setup/main.go -server amqp://localhost
-# listenbuddy is needed for ./start.py
-go get github.com/jsha/listenbuddy
-cd -
-
+docker-compose up -d
