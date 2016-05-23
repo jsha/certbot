@@ -5,8 +5,7 @@ cache:
         - $HOME/.cache/pip
 
 services:
-  - rabbitmq
-  - mariadb
+  - docker
   # apacheconftest
   #- apache2
 

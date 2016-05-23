@@ -27,6 +27,7 @@ set -xe
 # see `go help packages`
 go get -d github.com/letsencrypt/boulder/...
 cd $GOPATH/src/github.com/letsencrypt/boulder
+docker-compose up -d brabbitmq bmariadb
 # goose is needed for ./test/create_db.sh
 wget https://github.com/jsha/boulder-tools/raw/master/goose.gz && \
   mkdir $GOPATH/bin && \
