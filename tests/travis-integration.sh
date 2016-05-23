@@ -10,9 +10,9 @@ export CERTBOT_PATH=`pwd`
 
 cd $GOPATH/src/github.com/letsencrypt/boulder/
 
-until curl http://boulder:4000/directory ; do
+until curl http://boulder:4000/directory 2>/dev/null; do
   echo waiting for boulder
   sleep 1
 done
 
-./boulder-integration.sh
+./tests/boulder-integration.sh
