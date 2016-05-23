@@ -6,8 +6,6 @@ cache:
 
 dist: trusty
 before_install:
-  - git clone -b rev-rev https://github.com/letsencrypt/boulder $BOULDERPATH
-  - (cd $BOULDERPATH && docker-compose up -d)
   - 'dpkg -s libaugeas0'
 
 # using separate envs with different TOXENVs creates 4x1 Travis build
