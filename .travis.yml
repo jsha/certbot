@@ -1,13 +1,8 @@
-language: go
+language: python
 
 cache:
     directories:
         - $HOME/.cache/pip
-
-services:
-  - docker
-  # apacheconftest
-  #- apache2
 
 dist: trusty
 # http://docs.travis-ci.com/user/ci-environment/#CI-environment-OS
@@ -59,7 +54,6 @@ matrix:
       env: TOXENV=lint
     - sudo: required
       env: TOXENV=le_auto
-      services: docker
       before_install:
       addons:
     - python: "2.7"
