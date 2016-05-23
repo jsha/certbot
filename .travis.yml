@@ -116,8 +116,8 @@ addons:
     #- libapache2-mod-macro
     #- sudo
 
-install: "travis_retry pip install tox coveralls"
-script: 'docker-compose pull && travis_retry tox && ([ "xxx$BOULDER_INTEGRATION" = "xxx" ] || ./tests/travis-integration.sh)'
+install: "docker-compose pull && travis_retry pip install tox coveralls"
+script: 'travis_retry tox && ([ "xxx$BOULDER_INTEGRATION" = "xxx" ] || ./tests/travis-integration.sh)'
 
 after_success: '[ "$TOXENV" == "cover" ] && coveralls'
 
