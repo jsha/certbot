@@ -3,6 +3,6 @@
 # >>>> only tested on Ubuntu 14.04LTS <<<<
 
 # install boulder and its go dependencies
-go get -d github.com/letsencrypt/boulder/...
-cd $GOPATH/src/github.com/letsencrypt/boulder
+git clone -b rev-rev https://github.com/letsencrypt/boulder
+cd boulder
 docker-compose up -d
