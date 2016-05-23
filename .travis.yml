@@ -8,7 +8,6 @@ dist: trusty
 # http://docs.travis-ci.com/user/ci-environment/#CI-environment-OS
 # gimme has to be kept in sync with Boulder's Go version setting in .travis.yml
 before_install:
-  - docker-compose pull
   - 'dpkg -s libaugeas0'
   - '[ "xxx$BOULDER_INTEGRATION" = "xxx" ] || eval "$(gimme 1.5.1)"'
 
@@ -23,47 +22,12 @@ env:
 
 matrix:
   include:
-    - python: "2.6"
-      env: TOXENV=py26 BOULDER_INTEGRATION=1
-      sudo: true
-      after_failure:
-        - sudo cat /var/log/mysql/error.log
-        - ps aux | grep mysql
-    - python: "2.6"
-      env: TOXENV=py26-oldest BOULDER_INTEGRATION=1
-      sudo: true
-      after_failure:
-        - sudo cat /var/log/mysql/error.log
-        - ps aux | grep mysql
-    - python: "2.7"
-      env: TOXENV=apacheconftest
-      sudo: required
     - python: "2.7"
       env: TOXENV=py27 BOULDER_INTEGRATION=1
       sudo: true
       after_failure:
         - sudo cat /var/log/mysql/error.log
         - ps aux | grep mysql
-    - python: "2.7"
-      env: TOXENV=py27-oldest BOULDER_INTEGRATION=1
-      sudo: true
-      after_failure:
-        - sudo cat /var/log/mysql/error.log
-        - ps aux | grep mysql
-    - python: "2.7"
-      env: TOXENV=lint
-    - sudo: required
-      env: TOXENV=le_auto
-      before_install:
-      addons:
-    - python: "2.7"
-      env: TOXENV=cover
-    - python: "3.3"
-      env: TOXENV=py33
-    - python: "3.4"
-      env: TOXENV=py34
-    - python: "3.5"
-      env: TOXENV=py35
 
 # Only build pushes to the master branch, PRs, and branches beginning with
 # `test-`. This reduces the number of simultaneous Travis runs, which speeds
