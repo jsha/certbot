@@ -5,6 +5,10 @@ cache:
         - $HOME/.cache/pip
 
 dist: trusty
+services:
+  # apacheconftest
+  #- apache2
+
 before_install:
   - 'dpkg -s libaugeas0'
 
