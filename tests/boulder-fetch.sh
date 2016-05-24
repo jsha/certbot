@@ -2,11 +2,9 @@
 # Download and run Boulder instance for integration testing
 set -xe
 
-# `/...` avoids `no buildable Go source files` errors, for more info
-# see `go help packages`
+# Check out special branch until latest docker changes land in Boulder master.
 git clone -b rev-rev https://github.com/letsencrypt/boulder $BOULDERPATH
 cd $BOULDERPATH
-ifconfig
 sed -i 's/FAKE_DNS: .*/FAKE_DNS: 172.17.42.1/' docker-compose.yml
 docker-compose up -d
 
