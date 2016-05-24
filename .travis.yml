@@ -4,10 +4,8 @@ cache:
     directories:
         - $HOME/.cache/pip
 
+# This makes sure we get a host with docker-compose present.
 dist: trusty
-services:
-  # apacheconftest
-  #- apache2
 
 before_install:
   - 'dpkg -s libaugeas0'
