@@ -14,6 +14,7 @@ before_install:
 env:
   global:
     - GOPATH=/tmp/go
+    - FAKE_DNS=172.17.0.1
     - BOULDERPATH=$GOPATH/src/github.com/letsencrypt/boulder/
     - PATH=$GOPATH/bin:$PATH
     - GO15VENDOREXPERIMENT=1  # Fixes problems with vendor directories
