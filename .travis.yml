@@ -17,10 +17,7 @@ before_install:
 # test has failed
 env:
   global:
-    - GOPATH=/tmp/go
     - BOULDERPATH=$GOPATH/src/github.com/letsencrypt/boulder/
-    - PATH=$GOPATH/bin:$PATH
-    - GO15VENDOREXPERIMENT=1  # Fixes problems with vendor directories
 
 matrix:
   include:
