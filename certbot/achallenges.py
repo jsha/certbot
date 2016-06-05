@@ -8,9 +8,9 @@ and :class:`.ChallengeBody` (denoted by ``challb``)::
   from acme import messages
   from certbot import achallenges
 
-  chall = challenges.DNS(token='foo')
+  chall = challenges.DNS01(token='foo')
   challb = messages.ChallengeBody(chall=chall)
-  achall = achallenges.DNS(chall=challb, domain='example.com')
+  achall = achallenges.DNS01(chall=challb, domain='example.com')
 
 Note, that all annotated challenges act as a proxy objects::
 
@@ -55,7 +55,7 @@ class KeyAuthorizationAnnotatedChallenge(AnnotatedChallenge):
             self.account_key, *args, **kwargs)
 
 
-class DNS(AnnotatedChallenge):
+class DNS01(AnnotatedChallenge):
     """Client annotated "dns" ACME challenge."""
     __slots__ = ('challb', 'domain')
-    acme_type = challenges.DNS
+    acme_type = challenges.DNS01
