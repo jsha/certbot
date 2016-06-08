@@ -616,7 +616,7 @@ class ClientNetwork(object):  # pylint: disable=too-many-instance-attributes
         response = self.session.request(method, url, *args, **kwargs)
         content = response.content
         # DER certificates are not printable, so base64 encode them.
-        if response.headers['Content-Type'] == "application/pkix-cert":
+        if response.get('Content-Type') == "application/pkix-cert":
             content = base64.b64encode(content)
         logger.debug('Received response:\nHTTP %d\n%s\n\n%s',
                      response.status_code,
