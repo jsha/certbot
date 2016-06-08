@@ -1,9 +1,11 @@
 """ACME client API."""
+import base64
 import collections
 import datetime
 from email.utils import parsedate_tz
 import heapq
 import logging
+import string
 import time
 
 import six
@@ -612,11 +614,15 @@ class ClientNetwork(object):  # pylint: disable=too-many-instance-attributes
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('User-Agent', self.user_agent)
         response = self.session.request(method, url, *args, **kwargs)
+        content = response.content
+        # DER certificates are not printable, so base64 encode them.
+        if response.headers['Content-Type'] == "application/pkix-cert":
+            content = base64.b64encode(content)
         logger.debug('Received response:\nHTTP %d\n%s\n\n%s',
                      response.status_code,
                      "\n".join(["{0}: {1}".format(k, v)
                                 for k, v in response.headers.items()]),
-                     response.content)
+                     content)
         return response
 
     def head(self, *args, **kwargs):
