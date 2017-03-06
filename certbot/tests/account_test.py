@@ -146,6 +146,8 @@ class AccountFileStorageTest(unittest.TestCase):
 
     def test_find_all(self):
         self.storage.save(self.acc, self.mock_client)
+        print([self.acc])
+        print(self.storage.find_all())
         self.assertEqual([self.acc], self.storage.find_all())
 
     def test_find_all_none_empty_list(self):
