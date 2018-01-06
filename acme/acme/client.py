@@ -72,6 +72,7 @@ class Client(object):  # pylint: disable=too-many-instance-attributes
                 self.net.get(directory).json())
         else:
             self.directory = directory
+        print("DIRECTORY: ", self.directory)
 
     @classmethod
     def _regr_from_response(cls, response, uri=None, terms_of_service=None):
