@@ -287,7 +287,8 @@ class ClientV2:
         self.begin_finalization(orderr)
         return self.poll_finalization(orderr, deadline, fetch_alternative_chains)
 
-    def renewal_time(self, cert_pem: bytes) -> datetime.datetime:
+    def renewal_time(self, cert_pem: bytes
+                     ) -> Tuple[datetime.datetime, Optional[int]]:
         """Return an appropriate time to attempt renewal of the certificate.
 
         If the ACME directory has a "renewalInfo" field, the response will be
@@ -296,6 +297,11 @@ class ClientV2:
 
         If there is no "renewalInfo" field, this function will fall back to
         reasonable defaults based on the certificate lifetime.
+
+        The return value is a 2 element tuple of:
+
+            * recommended renewal_time
+            * an expiry for the renewal_time value, in seconds
 
         This function may make other network calls in the future (e.g., OCSP
         or CRL).
@@ -308,13 +314,14 @@ class ClientV2:
             not_before = cert.not_valid_before_utc
             lifetime = cert.not_valid_after_utc - not_before
             if lifetime.total_seconds() < 10 * 86400:
-                return not_before + lifetime / 2
+                return (not_before + lifetime / 2), None
             else:
-                return not_before + lifetime * 2 / 3
+                return (not_before + lifetime * 2 / 3), None
         ari_url = renewal_info_base_url + '/' + ari_path_component
         resp = self.net.get(ari_url, content_type='application/json').json()
-        renewal_info = messages.RenewalInfo.from_json(resp)
 
+        # compute the `random_time` to retry
+        renewal_info = messages.RenewalInfo.from_json(resp)
         start = renewal_info.suggested_window.start # type: ignore[attr-defined]
         end = renewal_info.suggested_window.end # type: ignore[attr-defined]
 
@@ -322,7 +329,18 @@ class ClientV2:
         random_seconds = random.uniform(0, delta_seconds)
         random_time = start + datetime.timedelta(seconds=random_seconds)
 
-        return random_time
+        # compute the retry_after
+        # a timestamp would be preferable, but this library is not pegged to UTC
+        retry_after_secs: Optional[int] = None
+        _retry_after_secs = resp.headers.get("Retry-After", None)
+        if _retry_after_secs:
+            try:
+                # guard against a server incorrectly sending timestamp, not secs
+                retry_after_secs = int(_retry_after_secs)
+            except ValueError:
+                pass
+
+        return random_time, retry_after_secs
 
     def revoke(self, cert: jose.ComparableX509, rsn: int) -> None:
         """Revoke certificate.

@@ -407,14 +407,14 @@ class ClientV2Test(unittest.TestCase):
             not_before=datetime.datetime(2025, 3, 12, 00, 00, 00),
             not_after=datetime.datetime(2025, 3, 20, 00, 00, 00),
         )
-        t = self.client.renewal_time(cert_pem)
+        t, _x = self.client.renewal_time(cert_pem)
         assert t == datetime.datetime(2025, 3, 16, 00, 00, 00, tzinfo=datetime.timezone.utc)
 
         cert_pem = make_cert_for_renewal(
             not_before=datetime.datetime(2025, 3, 12, 00, 00, 00),
             not_after=datetime.datetime(2025, 3, 30, 00, 00, 00),
         )
-        t = self.client.renewal_time(cert_pem)
+        t, _x = self.client.renewal_time(cert_pem)
         assert t == datetime.datetime(2025, 3, 24, 00, 00, 00, tzinfo=datetime.timezone.utc)
 
     def test_renewal_time_with_renewal_info(self):
@@ -434,7 +434,7 @@ class ClientV2Test(unittest.TestCase):
             },
             "message": "Keep those certs fresh"
         }
-        t = self.client.renewal_time(cert_pem)
+        t, _x = self.client.renewal_time(cert_pem)
         self.net.get.assert_called_once_with("https://www.letsencrypt-demo.org/acme/renewal-info/MTIzNA.AN3V", content_type='application/json')
         assert t == datetime.datetime(2025, 3, 14, 1, 1, 1, tzinfo=datetime.timezone.utc)
 
@@ -447,7 +447,7 @@ class ClientV2Test(unittest.TestCase):
             },
             "message": "Keep those certs fresh"
         }
-        t = self.client.renewal_time(cert_pem)
+        t, _x = self.client.renewal_time(cert_pem)
         self.net.get.assert_called_once_with("https://www.letsencrypt-demo.org/acme/renewal-info/MTIzNA.AN3V", content_type='application/json')
         assert t >= datetime.datetime(2025, 3, 16, 1, 1, 1, tzinfo=datetime.timezone.utc)
         assert t <= datetime.datetime(2025, 3, 17, 1, 1, 1, tzinfo=datetime.timezone.utc)
