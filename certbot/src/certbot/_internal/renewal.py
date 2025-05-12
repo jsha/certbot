@@ -1,5 +1,4 @@
 """Functionality for autorenewal and associated juggling of configurations"""
-
 import copy
 import datetime
 import itertools
@@ -49,7 +48,7 @@ STR_CONFIG_ITEMS = ["config_dir", "logs_dir", "work_dir", "user_agent",
                     "server", "account", "authenticator", "installer",
                     "renew_hook", "pre_hook", "post_hook", "http01_address",
                     "preferred_chain", "key_type", "elliptic_curve"]
-INT_CONFIG_ITEMS = ["rsa_key_size", "http01_port"]
+INT_CONFIG_ITEMS = ["rsa_key_size", "http01_port", "ari_retry_after"]
 BOOL_CONFIG_ITEMS = ["must_staple", "allow_subset_of_names", "reuse_key",
                      "autorenew"]
 
@@ -318,7 +317,7 @@ def should_renew(config: configuration.NamespaceConfig,
     if config.renew_by_default:
         logger.debug("Auto-renewal forced with --force-renewal...")
         return True
-    if should_autorenew(lineage, acme):
+    if should_autorenew(config, lineage, acme):
         logger.info("Certificate is due for renewal, auto-renewing...")
         return True
     if config.dry_run:
@@ -327,7 +326,10 @@ def should_renew(config: configuration.NamespaceConfig,
     display_util.notify("Certificate not yet due for renewal")
     return False
 
-def should_autorenew(lineage: storage.RenewableCert, acme: acme_client.ClientV2) -> bool:
+def should_autorenew(
+        cli_config: configuration.NamespaceConfig,
+        lineage: storage.RenewableCert,
+        acme: acme_client.ClientV2) -> bool:
     """Should we now try to autorenew the most recent cert version?
 
     This is a policy question and does not only depend on whether
@@ -346,16 +348,27 @@ def should_autorenew(lineage: storage.RenewableCert, acme: acme_client.ClientV2)
     if lineage.autorenewal_is_enabled():
         cert = lineage.version("cert", lineage.latest_common_version())
 
-        # Consider whether to attempt to autorenew this cert now
-        renewal_time = None
-        with open(cert, 'rb') as f:
-            cert_pem = f.read()
-        renewal_time, _ = acme.renewal_time(cert_pem)
-
         now = datetime.datetime.now(datetime.timezone.utc)
 
-        if renewal_time and now > renewal_time:
-            return True
+        stored_retry_after = int(lineage.configuration["renewalparams"].get("ari_retry_after"))
+        if (not stored_retry_after or
+            datetime.datetime.fromtimestamp(stored_retry_after, tz=datetime.timezone.utc) < now):
+            # Check ACME Renewal Info (ARI)
+            renewal_time = None
+            with open(cert, 'rb') as f:
+                cert_pem = f.read()
+            renewal_time, retry_after = acme.renewal_time(cert_pem)
+
+            new_config = copy.deepcopy(cli_config)
+            setattr(new_config, "ari_retry_after", round(retry_after.timestamp()))
+            symlinks = {kind: lineage.configuration[kind] for kind in storage.ALL_FOUR}
+            storage.update_configuration(lineage.lineagename, lineage.archive_dir, symlinks,
+                                            new_config)
+
+            if renewal_time and now > renewal_time:
+                return True
+        else:
+            logger.debug("skipping ARI check. ari_retry_after=%s", stored_retry_after)
 
         # Renewals on the basis of revocation
         if lineage.ocsp_revoked(lineage.latest_common_version()):
