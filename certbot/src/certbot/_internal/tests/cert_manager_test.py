@@ -225,6 +225,7 @@ class CertificatesTest(BaseCertManagerTest):
 
         mock_config = mock.MagicMock(certname=None, lineagename=None)
         mock_config.domains = []
+        mock_config.ip_addresses = []
         # pylint: disable=protected-access
 
         # pylint: disable=protected-access
@@ -333,7 +334,7 @@ class LineageForCertnameTest(BaseCertManagerTest):
 
 
 class DomainsForCertnameTest(BaseCertManagerTest):
-    """Tests for certbot._internal.cert_manager.sans_for_certname"""
+    """Tests for certbot._internal.cert_manager.identifiers_for_certname"""
 
     @mock.patch('certbot.util.make_or_verify_dir')
     @mock.patch('certbot._internal.storage.renewal_file_for_certname')
