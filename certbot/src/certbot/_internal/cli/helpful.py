@@ -334,11 +334,9 @@ class HelpfulArgumentParser:
         x509_req = x509.load_pem_x509_csr(util_csr.data)
         domains, ip_addresses = san.from_x509(x509_req.subject, x509_req.extensions)
 
-        # The SANs from the CSR are added to the command line flags. That's how main.certonly
-        # gets the list of identifiers to request. Note: this does not clear command line flags
-        # set by the user. Any existing flags must be a subset of what's in the CSR.
+        # The SANs from the CSR are added to the domains from command line flags as this config
+        # setting is where main.certonly gets the list of identifiers to request.
         config.domains.extend(domains)
-        config.ip_addresses.extend(ip_addresses)
 
         if not domains + ip_addresses:
             # TODO: add CN to domains instead:
@@ -349,12 +347,12 @@ class HelpfulArgumentParser:
         config.actual_csr = (util_csr, typ)
 
         # Check that the original values for --domain and --ip-address set by the user were
-        # a subset of the domains and IP addresses listed in the CSR.
-        if set(config.domains) != set(domains) or set(config.ip_addresses) != set(ip_addresses):
+        # a subset of the domains listed in the CSR.
+        if set(config.domains) != set(domains):
             raise errors.ConfigurationError(
                 "Inconsistent requests:\nFrom the CSR: {0}\nFrom command line/config: {1}"
                 .format(san.display(san.join(domains, ip_addresses)),
-                        san.display(san.join(config.domains, config.ip_addresses))))
+                        san.display(config.domains)))
 
 
     def determine_verb(self) -> None:

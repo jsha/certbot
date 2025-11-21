@@ -657,7 +657,7 @@ class Client:
 
         return abs_cert_path, abs_chain_path, abs_fullchain_path
 
-    def deploy_certificate(self, sans: list[san.SAN], privkey_path: str, cert_path: str,
+    def deploy_certificate(self, sans: list[san.DNSName], privkey_path: str, cert_path: str,
                            chain_path: str, fullchain_path: str) -> None:
         """Install certificate
 
